@@ -1,29 +1,19 @@
 #include "hash.h"
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 // FUNCTIONS
 
-// Gera chaves aleatórias não repetidas
-void geraAleatorio(int *vet, int m){
-    int i = 0, j, igual;
-    srand(time(NULL));
-
+void criaDados(int m,int tam){
+    FILE *arq = fopen("entradas.bin","wb");
+    int aux;
+    for(int i=0;i<tam;i++){
+        aux = rand() % m;
+        fprintf("%d ",&aux);
+    }
     
-    do{ // faça
-        int chave = rand() % m*2; // sorteia uma chave
-        printf("Chave sorteada -> %d\n", chave);
-        insere(vet, m, chave);
-        igual = 0;
-        for(j = 0; j < i; j++){ // percorre a parte do vetor já preenchida
-            if(vet[j] == vet[i])
-                igual = 1; // chave repetida
-        }
-
-        if(igual == 0) // significa que a chave não se repetiu
-            i++;
-    }while(i < m); // enquanto não for sorteado m chaves diferentes
-    printf("\n\n");
 }
+
 
 // Inicializa o Vetor de chaves com posições vazias (considera -1 como posições vazias)
 void inicializa(int *tab, int m) {

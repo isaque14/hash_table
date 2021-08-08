@@ -1,9 +1,9 @@
 #ifndef HASH_H
 #define HASH_H
 
+void criaDados(int m, int tam);
 void inicializa(int *tab, int m);
 void imprime(int *vet, int m);
-void geraAleatorio(int *vet, int m);
 int hash(int mat, int m);
 int hash_linear(int mat, int m, int k); 
 int hash_quadratico(int chave, int m, int k);
