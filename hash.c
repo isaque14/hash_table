@@ -4,12 +4,13 @@
 
 // FUNCTIONS
 
+//cria arquivo com entradas aleatorias
 void criaDados(int m,int tam){
     FILE *arq = fopen("entradas.bin","wb");
     int aux;
     for(int i=0;i<tam;i++){
         aux = rand() % m;
-        fprintf(arq,"%d ",aux);
+        fwrite(&aux,sizeof(int),sizeof(int),arq);
     }
     fclose(arq);
 }
