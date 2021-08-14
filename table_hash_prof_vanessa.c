@@ -86,6 +86,8 @@ int busca(Hash *tab, int m, int mat, int *achou) {
     }
 }
 
+
+
 /*
  * Função insere assume que end é o endereço onde será efetuada a inserção.
  *
