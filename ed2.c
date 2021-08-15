@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define tam 11
+#define tam 100
 
 
 // Gera chaves aleatórias não repetidas
@@ -36,17 +36,23 @@ void criaDados(){
     printf("\n\n");
 }
 
-/*
-void criaDados(int m){
-    FILE *arq = fopen("entradas.bin","wb"); 
-    int aux;
-    for(int i=0;i<tam;i++){
-        aux = rand() % m;
-        fwrite(&aux, sizeof(int), 1, arq);
-    }
-    fclose(arq);
+int num_primo (int num){
+    int cont = 0;
+    do{
+        for (int i = 1; i <= num; i++) 
+            if (num % i == 0)
+                cont++;
+
+       if (cont != 2)
+            num--, cont = 0; 
+
+    }while (cont != 2 && num > 0);    
+
+    if (cont == 2)
+        return num;  
+    else
+        return -1;  
 }
-*/
 
 int hash(int chave, int m) {
     return chave % m;
@@ -54,6 +60,22 @@ int hash(int chave, int m) {
 
 int hash_linear(int chave, int m, int k) {
     return (hash(chave, m) + k) % m;
+}
+
+int hash_quadratico(int chave, int m, int k){
+    return (hash(chave, m) + k*k) % m;
+}
+
+// Auxiliar do hash duplo
+int hash_ii(int k, int chave){
+    return (k - (chave % k));
+}
+
+int hash_duplo(int chave, int m, int k){
+    int q = num_primo(m-1);
+    //printf("Primo antecessor de m -> %d\n", q);
+    if (q != -1)
+        return (hash(chave, m) + k * hash_ii(q, chave)) % m;
 }
 
 void criaTabela(){
@@ -70,15 +92,15 @@ void criaTabela(){
 double fatorCarga(){
     FILE *arq = fopen("tabela.bin","rb");
     int aux;
-    int vazio = 0;
+    double nRegis = 0;
     for(int i = 0; i < tam; i++){
         fseek(arq, i*sizeof(int), SEEK_SET);
         fread(&aux, sizeof(int), 1, arq);
-        if(aux == -1)
-            vazio++;
+        if(aux != -1)
+            nRegis++;
     }
     fclose(arq);
-    return (tam-vazio)/vazio;
+    return nRegis/tam;
 }
 
 int busca(int chave, int *achou) {
@@ -93,7 +115,7 @@ int busca(int chave, int *achou) {
     int aux = 0;
 
     while (k < tam) {
-        end = hash_linear(chave, tam, k);
+        end = hash_duplo(chave, tam, k);
         //printf("End = %d\n", end);
        
         fseek(arq, end*sizeof(int), SEEK_SET);
@@ -184,6 +206,7 @@ void imprime() {
 }
 
 int main(void) {
+    printf("GERANDO DADOS ALEATORIOS...\n");
     criaTabela();
     criaDados();
 
@@ -191,22 +214,46 @@ int main(void) {
     imprime();
     printf("\n");
     
-    /*
-    // CÓDIGO PARA INSERÇÃO DO ARQUIVO DE ENTRADAS PARA O ARQUIVO TABELA
+    // CÓDIGO INCERÇÃO/REMOÇÃO ALTOMÁTICA COM FATOR DE CARGA
     FILE *imput = fopen("entradas.bin","rb");
     int chave = 0;
+    int end = 0;
+    float carga = 0;
     for (int i = 0; i < tam; i++){
            
         fseek(imput, i*sizeof(int), SEEK_SET);
         fread(&chave, sizeof(int), 1, imput);
-        insere(chave);
+
+        carga = fatorCarga();
+        printf("Fator de Carga = %.3f\n", carga);
+        
+        if (carga < 0.9)
+            insere(chave);
+        
+        if (carga > 0.9){
+            end = rand() % tam;
+            printf("Tabela Atual\n");
+            imprime();
+            printf("Incersao nao realizada, Fator de Carga > 0.9\n");
+            printf("Endereco sorteado para remocao -> %d\n", end);
+            
+            FILE *arq = fopen("tabela.bin","rb");
+            fseek(arq, end*sizeof(int), SEEK_SET);
+            fread(&chave, sizeof(int), 1, arq);
+            fclose(arq);
+
+            removeChave(chave);
+        }
     }
+    
+    printf("fator de Carga final -> %.3f\n", fatorCarga());
     printf("\nTabela Final\n");
     imprime();
     fclose(imput);
-    */
+    
 
-    // CÓDIGO PARA INSERÇÃO
+    // CÓDIGO PARA INSERÇÃO COM FATOR DE CARGA
+    /*
     int chave = 0;
     float carga = 0;
     for (int i = 0; i < 11; i++){
@@ -215,19 +262,24 @@ int main(void) {
         carga = fatorCarga();
         printf("Fator de Carga = %.3f\n", carga);
 
-        if (carga < 0.7)
+        if (carga < 0.9)
             insere(chave);
 
-        if (carga > 0.9)
+        if (carga > 0.9){
+            chave = rand() % tam;
             printf("Incerso nao realizada, Fator de Carga > 0.9\n");
+            printf("Chave sorteada para remocao -> %d\n", chave);
+            removeChave(chave);
+        }
 
         printf("\nTabela Atual:\n");
         imprime();
         printf("\n");
     }
+    */
     
+    //CÓDIGO PARA REMOÇÃO
     /*
-     //CÓDIGO PARA REMOÇÃO
     printf("Digite a chave a ser removida -> ");
     scanf("%d", &chave);
     removeChave(chave);
@@ -252,8 +304,7 @@ int main(void) {
     }
     */
     
-
-    printf("fim!\n");                           
+    printf("FIM!\n");                           
     return 0;
 }
 
