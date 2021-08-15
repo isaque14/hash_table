@@ -3,31 +3,40 @@
 #include <time.h>
 #define tam 11
 
-/*
+
 // Gera chaves aleatórias não repetidas
-void geraAleatorio(int *vet){
-    int i = 0, j, igual;
+void criaDados(){
+    int i = 0, j, igual, aux;
     srand(time(NULL));
 
-
-    do{ // faça
+    do{ 
         int chave = rand() % tam*2; // sorteia uma chave
-        printf("Chave sorteada -> %d\n", chave);
-        insere(vet, tam, chave);
+        //printf("Chave sorteada -> %d\n", chave);
+        
+        FILE *arq = fopen("entradas.bin","rb+");
+        fseek(arq, i*sizeof(int), SEEK_SET);
+        fwrite(&chave, sizeof(int), 1, arq);
+        fclose(arq);
+
         igual = 0;
-        for(j = 0; j < i; j++){ // percorre a parte do vetor já preenchida
-            if(vet[j] == vet[i])
+        for(j = 0; j < i; j++){ // percorre a parte do arquivo já preenchida
+            FILE *arq = fopen("entradas.bin","rb");
+
+            fseek(arq, j*sizeof(int), SEEK_SET);
+            fread(&aux, sizeof(int), 1, arq);
+            fclose(arq);
+            
+            if(chave == aux)
                 igual = 1; // chave repetida
         }
 
         if(igual == 0) // significa que a chave não se repetiu
             i++;
-    }while(i < tam); // enquanto não for sorteado m chaves diferentes
+    }while(i < tam); // enquanto não for sorteado tam chaves diferentes
     printf("\n\n");
 }
 
-*/
-
+/*
 void criaDados(int m){
     FILE *arq = fopen("entradas.bin","wb"); 
     int aux;
@@ -37,6 +46,7 @@ void criaDados(int m){
     }
     fclose(arq);
 }
+*/
 
 int hash(int chave, int m) {
     return chave % m;
@@ -50,23 +60,22 @@ void criaTabela(){
     FILE *arq = fopen("tabela.bin","wb");
     int aux = -1;
 
-    for(int i = 0; i < 11; i++){
+    for(int i = 0; i < tam; i++){
         fseek(arq, i*sizeof(int), SEEK_SET);
         fwrite(&aux, sizeof(int), 1, arq);
     }
     fclose(arq);
 }
 
-float fatorCarga(){
+double fatorCarga(){
     FILE *arq = fopen("tabela.bin","rb");
     int aux;
     int vazio = 0;
-    for(int i=0;i<tam;i++){
-        fseek(arq,i,SEEK_SET);
-        fread(&aux,sizeof(int),sizeof(int),arq);
-        if(aux == -1){
+    for(int i = 0; i < tam; i++){
+        fseek(arq, i*sizeof(int), SEEK_SET);
+        fread(&aux, sizeof(int), 1, arq);
+        if(aux == -1)
             vazio++;
-        }
     }
     fclose(arq);
     return (tam-vazio)/vazio;
@@ -76,7 +85,7 @@ int busca(int chave, int *achou) {
     
     FILE *arq = fopen("tabela.bin","rb");
     
-    printf("\nBuscando...\n");
+    //printf("\nBuscando...\n");
     *achou = 0;
     int end = -1;
     int pos_livre = -1;
@@ -128,7 +137,7 @@ void insere(int chave) {
             fseek(arq, end*sizeof(int), SEEK_SET);   
             fwrite(&chave, sizeof(int), 1, arq);
             fclose(arq);
-            printf("chave incerida");
+            //printf("chave incerida");
         } 
         else {
             //Não foi encontrada posição livre durante a busca: overflow
@@ -138,7 +147,6 @@ void insere(int chave) {
         printf("Chave ja existe. Insercao invalida! \n");
     }
 }
-
 
 void removeChave(int chave) {
     int achou;
@@ -152,7 +160,7 @@ void removeChave(int chave) {
         fclose(arq);
         printf("chave removida\n");
     } else {
-        printf("Matricula nao encontrada. Remocao nao realizada!\n");
+        printf("Chave nao encontrada. Remocao nao realizada!\n");
     }
 }
 
@@ -177,22 +185,48 @@ void imprime() {
 
 int main(void) {
     criaTabela();
-    //criaDados(100);
+    criaDados();
 
     printf("Tabela Inicial\n");
     imprime();
+    printf("\n");
     
-    
+    /*
+    // CÓDIGO PARA INSERÇÃO DO ARQUIVO DE ENTRADAS PARA O ARQUIVO TABELA
+    FILE *imput = fopen("entradas.bin","rb");
+    int chave = 0;
+    for (int i = 0; i < tam; i++){
+           
+        fseek(imput, i*sizeof(int), SEEK_SET);
+        fread(&chave, sizeof(int), 1, imput);
+        insere(chave);
+    }
+    printf("\nTabela Final\n");
+    imprime();
+    fclose(imput);
+    */
+
     // CÓDIGO PARA INSERÇÃO
     int chave = 0;
-    for (int i = 0; i < 4; i++){
+    float carga = 0;
+    for (int i = 0; i < 11; i++){
         printf("Digite a chave a ser inserida -> ");
         scanf("%d", &chave);
-        insere(chave);
-        printf("\nTabela Atual:\n");
-    imprime();
-    }
+        carga = fatorCarga();
+        printf("Fator de Carga = %.3f\n", carga);
 
+        if (carga < 0.7)
+            insere(chave);
+
+        if (carga > 0.9)
+            printf("Incerso nao realizada, Fator de Carga > 0.9\n");
+
+        printf("\nTabela Atual:\n");
+        imprime();
+        printf("\n");
+    }
+    
+    /*
      //CÓDIGO PARA REMOÇÃO
     printf("Digite a chave a ser removida -> ");
     scanf("%d", &chave);
@@ -200,11 +234,12 @@ int main(void) {
 
     printf("\nTabela Final:\n");
     imprime();    
-    
+    */
+
+    //CÓDIGO PARA BUSCA
     /*
     for (int i = 0; i < 3; i++){
         printf("\n\n");
-        //CÓDIGO PARA BUSCA
         int chave;
         printf("Digite a chave a ser procurada... ");
         scanf("%d", &chave);
