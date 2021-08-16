@@ -13,7 +13,7 @@ void criaDados(){
         int chave = rand() % tam*2; // sorteia uma chave
         //printf("Chave sorteada -> %d\n", chave);
         
-        FILE *arq = fopen("entradas.bin","rb+");
+        FILE *arq = fopen("entradas.bin","r+b");
         fseek(arq, i*sizeof(int), SEEK_SET);
         fwrite(&chave, sizeof(int), 1, arq);
         fclose(arq);
@@ -155,7 +155,7 @@ void insere(int chave) {
         if (end != -1) {
                 //Não encontrou a chave, mas encontrou posição livre
                 //Inserção será realizada nessa posição livre encontrada pela busca
-            FILE *arq = fopen("tabela.bin","rb+");
+            FILE *arq = fopen("tabela.bin","r+b");
             fseek(arq, end*sizeof(int), SEEK_SET);   
             fwrite(&chave, sizeof(int), 1, arq);
             fclose(arq);
@@ -176,7 +176,7 @@ void removeChave(int chave) {
     if (achou) {
         //remove
         chave = -1;
-        FILE *arq = fopen("tabela.bin","rb+");
+        FILE *arq = fopen("tabela.bin","r+b");
         fseek(arq, end*sizeof(int), SEEK_SET);   
         fwrite(&chave, sizeof(int), 1, arq);
         fclose(arq);
