@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define tam 10000 //2m e 5s sem printf
+#define tam 1000 
+char arquivo[] = "tabqlin1.bin";
 
 int num_primo (int num){
     int cont = 0;
@@ -44,7 +45,7 @@ int hash_duplo(int chave, int m, int k){
 }
 
 double fatorCarga(){
-    FILE *arq = fopen("tabela.bin","rb");
+    FILE *arq = fopen(arquivo,"rb");
     int aux;
     double nRegis = 0;
     for(int i = 0; i < tam; i++){
@@ -58,7 +59,7 @@ double fatorCarga(){
 }
 
 void criaTabela(){
-    FILE *arq = fopen("tabela.bin","wb");
+    FILE *arq = fopen(arquivo,"wb");
     int aux = -1;
     for(int i=0;i<tam;i++){
         fseek(arq,i*sizeof(int),SEEK_SET);
@@ -69,9 +70,10 @@ void criaTabela(){
 
 int buscaChave(int chave) {
     
-    FILE *arq = fopen("tabela.bin","rb");
+    FILE *arq = fopen(arquivo,"rb");
     int aux;
-    for(int i=hash(chave,tam);i<tam;i++){
+    int init = hash(chave,tam);
+    for(int i=init;i<init+100;i++){
         fseek(arq,i*sizeof(int),SEEK_SET);
         fread(&aux,sizeof(int),1,arq);
         if(aux == chave){
@@ -86,22 +88,23 @@ int buscaChave(int chave) {
 void insereChave(int chave) {
     int aux = buscaChave(chave);
     if(aux == -1){
-        FILE *arq = fopen("tabela.bin","r+b");
-        for(int i=hash(chave,tam);i<tam;i++){
+        FILE *arq = fopen(arquivo,"r+b");
+        int init = hash(chave,tam);
+        for(int i=init;i<init+100&&i<tam;i++){
             fseek(arq,i*sizeof(int),SEEK_SET);
             fread(&aux,sizeof(int),1,arq);
             if(aux == -1){
                 fseek(arq,i*sizeof(int),SEEK_SET);
                 fwrite(&chave,sizeof(int),1,arq);
-                //printf("inserindo a chave %d\n",chave);
+                printf("inserindo a chave %d\n",chave);
                 break;
             }
         }
         fclose(arq);
     }
-    //else{
-        //printf("sem espaço livre para a chave %d\n",chave);
-        //}
+    else{
+        printf("sem espaço livre para a chave %d\n",chave);
+        }
 }
 
 void removeChave(int chave){
@@ -111,7 +114,7 @@ void removeChave(int chave){
         printf("chave nao encontrada\n");
     }
     else{
-        FILE *arq = fopen("tabela.bin","r+b");
+        FILE *arq = fopen(arquivo,"r+b");
         fseek(arq,aux*sizeof(int),SEEK_SET);
         fwrite(&vazio,sizeof(int),1,arq);
         fclose(arq);
@@ -120,7 +123,7 @@ void removeChave(int chave){
 }
 
 void imprimeTabela() {
-    FILE *arq = fopen("tabela.bin","rb");
+    FILE *arq = fopen(arquivo,"rb");
     int aux = 0;
     
     for(int i = 0; i < tam; i++){
@@ -143,10 +146,13 @@ int main(void) {
     imprimeTabela();
     srand(time(NULL));
 
-    while(fatorCarga() < 0.7){
-        insereChave(rand()%tam*2);
-    }   
-    
+    while(fatorCarga()<=0.9){
+        insereChave(rand()%tam*100);
+    }  
+    while(fatorCarga()>=0.8){
+        removeChave(rand()%tam*100);
+    }
+
     imprimeTabela();
 
     return 0;
