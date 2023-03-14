@@ -1,18 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define tam 100 //dando problema em 500 em diante
+#define tam 100 
 
-// Tocar tipo de hash na função busca linha 109
+// Alternar entre tipos de hash na função busca linha 109
 
 int colisao = 0;
 
 int criaChave()
 {
-    //srand(time(NULL));
     return rand() % 100000;
 }
-
 
 int num_primo(int num)
 {
@@ -58,7 +56,6 @@ int hash_ii(int k, int chave)
 int hash_duplo(int chave, int m, int k)
 {
     int q = num_primo(m - 1);
-    //printf("Primo antecessor de m -> %d\n", q);
     if (q != -1)
         return (hash(chave, m) + k * hash_ii(q, chave)) % m;
 }
@@ -94,10 +91,8 @@ double fatorCarga()
 
 int busca(int chave, int *achou)
 {
-
     FILE *arq = fopen("tabela.bin", "rb");
 
-    //printf("\nBuscando...\n");
     *achou = 0;
     int end = -1;
     int pos_livre = -1;
@@ -113,9 +108,8 @@ int busca(int chave, int *achou)
 
         if (aux == chave)
         {
-            //encontrou chave
             *achou = 1;
-            k = tam; //força saída do loop
+            k = tam; 
         }
         else
         {
@@ -131,15 +125,12 @@ int busca(int chave, int *achou)
             }
             else
             {
-                //printf("endereco %d Ja preenchido\n", end);
                 colisao++;
             }
 
-            k = k + 1; //continua procurando
+            k = k + 1; 
         }
     }
-
-    //printf("Colisao final em busca %d\n", colisao);
 
     if (*achou)
     {
@@ -168,11 +159,9 @@ void insere(int chave)
             fseek(arq, end * sizeof(int), SEEK_SET);
             fwrite(&chave, sizeof(int), 1, arq);
             fclose(arq);
-            //printf("chave incerida");
         }
         else
         {
-            //Não foi encontrada posição livre durante a busca: overflow
             printf("A tabela esta cheia. Ocorreu overflow. Insercao nao realizada!\n");
         }
     }
@@ -188,7 +177,6 @@ void removeChave(int chave)
     int end = busca(chave, &achou);
     if (achou)
     {
-        //remove
         chave = -1;
         FILE *arq = fopen("tabela.bin", "r+b");
         fseek(arq, end * sizeof(int), SEEK_SET);
@@ -204,7 +192,6 @@ void removeChave(int chave)
 
 void imprimeVetor(int *vet)
 {
-
     printf("[ ");
 
     for (int i = 0; i < tam; i++)
@@ -253,7 +240,6 @@ int main(void)
 
         chave = criaChave();
         carga = fatorCarga();
-        //printf("Fator de Carga = %.3f\n", carga);
 
         if (carga < 0.9)
             insere(chave);
@@ -261,8 +247,6 @@ int main(void)
         if (carga > 0.9)
         {
             end = rand() % tam;
-            //printf("Tabela Atual\n");
-            //imprime();
             printf("\nIncersao nao realizada, Fator de Carga > 0.9\n");
             printf("Endereco sorteado para remocao -> %d\n", end);
 
@@ -282,8 +266,6 @@ int main(void)
     printf("\n\nfator de Carga final -> %.3f\n", fatorCarga());
     printf("Numero de Colisoes -> %d\n\n", colisao);
 
-    // OBTENDO TEMPO NA BUSCA DE UMA VARIÁVEL ALEATÓRIA
-
     clock_t tempoTotal;
     chave = -1;
     int achou;
@@ -297,7 +279,6 @@ int main(void)
     }
     fclose(arq);
 
-    //Obtendo o tempo
     tempoTotal = clock();
     busca(chave, &achou);
     tempoTotal = clock() - tempoTotal;
