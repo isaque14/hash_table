@@ -6,6 +6,7 @@
 // Alternar entre tipos de hash na função busca linha 109
 
 int colisao = 0;
+int tipo_hash = 0;
 
 int criaChave()
 {
@@ -101,8 +102,17 @@ int busca(int chave, int *achou)
 
     while (k < tam)
     {
-        end = hash_linear(chave, tam, k);
+        if (tipo_hash == 1){
+            end = hash_linear(chave, tam, k);
+        }
+        
+        else if (tipo_hash == 2){
+            end = hash_quadratico(chave, tam, k);
+        }
 
+        else
+            end = hash_duplo(chave, tam, k);
+        
         fseek(arq, end * sizeof(int), SEEK_SET);
         fread(&aux, sizeof(int), 1, arq);
 
@@ -225,6 +235,10 @@ void imprime()
 
 int main(void)
 {
+    printf("Escolha um hash:\n1 -> hash Linear\n2 -> hash Quadratico\n3 -> hash Duplo\n");
+    scanf("%d", &tipo_hash);
+
+
     printf("Gerando Dados...\n\n");
 
     criaTabela();
